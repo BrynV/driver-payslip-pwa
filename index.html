@@ -51,7 +51,8 @@ body{
   gap:12px; margin-bottom:16px; flex-wrap:wrap;
 }
 .brand h1{
-  font-size:1.3rem; font-weight:800; letter-spacing:0.02em; margin:0;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:1.25rem; font-weight:700; letter-spacing:0.03em; margin:0;
   color:var(--accent); text-transform:uppercase;
 }
 .brand .sub{ font-size:0.76rem; color:var(--ink-soft); margin-top:3px; }
@@ -78,9 +79,11 @@ body{
 .field-row:last-child{ margin-bottom:0; }
 .field{ flex:1; min-width:0; }
 .field label{
-  display:block; font-size:0.66rem; text-transform:uppercase; letter-spacing:0.06em;
+  display:flex; align-items:center; gap:5px;
+  font-size:0.66rem; text-transform:uppercase; letter-spacing:0.06em;
   color:var(--ink-soft); margin-bottom:5px;
 }
+.ico{ width:13px; height:13px; flex:none; opacity:0.8; }
 .field input, .field select{
   width:100%; font-family:'Archivo',sans-serif; font-size:0.9rem;
   background:var(--input-bg); border:1px solid var(--line); border-radius:8px;
@@ -180,6 +183,25 @@ footer a{ color:var(--accent); }
   </div>
 
   <div class="card">
+    <div class="field-row">
+      <div class="field">
+        <label for="weekOf"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span data-i18n="weekOfLabel">Week of</span></label>
+        <input id="weekOf" type="date">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="driverName"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg><span data-i18n="driverLabel">Driver</span></label>
+        <input id="driverName" type="text" placeholder="First Last">
+      </div>
+      <div class="field">
+        <label for="vehicleNo"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="9" width="20" height="8" rx="2"/><path d="M5 9V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2M6 17v2M18 17v2"/></svg><span data-i18n="vehicleLabel">Vehicle</span></label>
+        <input id="vehicleNo" type="text" placeholder="AB12 CDE">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
     <h2 data-i18n="ratesTitle">Rates for this week</h2>
     <div class="field-row">
       <div class="field">
@@ -238,6 +260,9 @@ const I18N = {
   en: {
     title: "Driver Payslip",
     subtitle: "Net pay per week — PAYE tax code 1257L",
+    weekOfLabel: "Week of",
+    driverLabel: "Driver",
+    vehicleLabel: "Vehicle",
     ratesTitle: "Rates for this week",
     dayRateLabel: "Day rate",
     otRateLabel: "Overtime £/hr",
@@ -276,6 +301,9 @@ const I18N = {
   uk: {
     title: "Зарплата водія",
     subtitle: "Чиста зарплата за тиждень — PAYE, код 1257L",
+    weekOfLabel: "Тиждень з",
+    driverLabel: "Водій",
+    vehicleLabel: "Номер фури",
     ratesTitle: "Ставки на цей тиждень",
     dayRateLabel: "Ставка за день",
     otRateLabel: "Понаднормові £/год",
@@ -369,17 +397,23 @@ function renderDays(){
     if (d.working) {
       const grid = document.createElement('div');
       grid.className = 'smallgrid';
+      const ICONS = {
+        hours: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
+        adr: '<path d="M12 2 2 21h20L12 2z"/><path d="M12 10v4M12 17.5v.01"/>',
+        genset: '<rect x="3" y="7" width="18" height="12" rx="2"/><path d="M7 7V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2M8 13h2m4 0h2"/>',
+        splitter: '<path d="M6 3v7a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V3M12 13v8M8 21h8"/>'
+      };
       const fields = [
-        ['hoursLabel', 'hours', d.hours],
-        ['adrLabel', 'adr', d.adr],
-        ['gensetLabel', 'genset', d.genset],
-        ['splitterLabel', 'splitter', d.splitter]
+        ['hoursLabel', 'hours', d.hours, 'hours'],
+        ['adrLabel', 'adr', d.adr, 'adr'],
+        ['gensetLabel', 'genset', d.genset, 'genset'],
+        ['splitterLabel', 'splitter', d.splitter, 'splitter']
       ];
-      fields.forEach(([labelKey, prop, val]) => {
+      fields.forEach(([labelKey, prop, val, iconKey]) => {
         const f = document.createElement('div');
         f.className = 'field';
         const lab = document.createElement('label');
-        lab.textContent = t[labelKey];
+        lab.innerHTML = '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ICONS[iconKey] + '</svg><span>' + t[labelKey] + '</span>';
         const inp = document.createElement('input');
         inp.type = 'number';
         inp.step = '0.5';
@@ -396,11 +430,11 @@ function renderDays(){
       nightRow.className = 'togglepair';
       const awayBtn = document.createElement('button');
       awayBtn.type = 'button';
-      awayBtn.textContent = t.away;
+      awayBtn.innerHTML = '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span>' + t.away + '</span>';
       awayBtn.className = d.away ? 'on' : '';
       const homeBtn = document.createElement('button');
       homeBtn.type = 'button';
-      homeBtn.textContent = t.home;
+      homeBtn.innerHTML = '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg><span>' + t.home + '</span>';
       homeBtn.className = !d.away ? 'on' : '';
       awayBtn.addEventListener('click', () => { d.away = true; renderDays(); });
       homeBtn.addEventListener('click', () => { d.away = false; renderDays(); });
